@@ -35,11 +35,6 @@ namespace RusINNfoBot.Handlers
                 }
             }
 
-            if (validInns.Count == 0)
-            {
-                return "Все указанные ИНН некорректны. Убедитесь, что каждый ИНН содержит 10 или 12 цифр.";
-            }
-
             var companies = new List<(string Name, string Address)>();
 
             foreach (var inn in validInns)
@@ -52,6 +47,11 @@ namespace RusINNfoBot.Handlers
                     var data = suggestion.data;
                     companies.Add((data.name.full_with_opf, data.address.value));
                 }
+                else
+                {
+                    // Компания не найдена — считаем как недействительный ИНН
+                    invalidInns.Add(inn);
+                }
             }
 
             if (companies.Count == 0)
@@ -63,7 +63,7 @@ namespace RusINNfoBot.Handlers
 
             if (invalidInns.Count > 0)
             {
-                sb.AppendLine($"Некорректные ИНН: {string.Join(", ", invalidInns)}");
+                sb.AppendLine($"Некорректные или не найденные ИНН: {string.Join(", ", invalidInns)}");
             }
 
             sb.AppendLine("Результаты поиска:");
@@ -82,6 +82,7 @@ namespace RusINNfoBot.Handlers
 
             return result;
         }
+
 
 
         private static bool IsValidInn(string inn)
